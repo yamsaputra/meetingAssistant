@@ -1,0 +1,9 @@
+<template>
+  <div class="rounded-md bg-red-50 border border-red-200 p-4 text-sm text-red-700">
+    <strong class="font-medium">Error:</strong> {{ message }}
+  </div>
+</template>
+
+<script setup>
+defineProps({ message: String });
+</script>
