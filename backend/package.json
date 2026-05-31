@@ -1,0 +1,21 @@
+{
+  "name": "meeting-assistant",
+  "version": "0.1.0",
+  "description": "Boilerplate Express server for the OpenAI Responses API (project & meeting assistant demo).",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=18.17"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.0",
+    "multer": "^1.4.5-lts.1",
+    "node-fetch": "^3.3.2"
+  }
+}

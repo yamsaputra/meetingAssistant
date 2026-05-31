@@ -53,3 +53,4 @@ Thumbs.db
 # misc
 tmp/
 temp/
+.claude/
