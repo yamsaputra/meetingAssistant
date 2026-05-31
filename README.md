@@ -25,7 +25,9 @@ Requires Node **18.17+** (uses global `FormData`/`Blob`) — Node 20+ recommende
 cd meeting-assistant
 npm install
 cp .env.example .env   # fill in OPENAI_API_KEY
-npm run dev            # starts with --watch
+npm run dev            # starts with --watch, both front- and -backend.
+npm run dev:frontend   # starts just the frontend.
+npm run dev:backend    # just the backend.
 ```
 
 Server: `http://localhost:8000`
