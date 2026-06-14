@@ -1,3 +1,9 @@
+/**
+ * @description Helper/backbone function to make API requests and handle errors
+ * @param {String} url 
+ * @param {Object} options 
+ * @returns 
+ */
 async function request(url, options = {}) {
   const res = await fetch(url, options);
   if (!res.ok) {
@@ -7,11 +13,11 @@ async function request(url, options = {}) {
   return res.json();
 }
 
-export function postChat(message) {
+export function postChat(message, context) {
   return request('/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ input: message }),
+    body: JSON.stringify({ input: message, ...(context && { context }) }),
   });
 }
 

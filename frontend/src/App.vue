@@ -34,7 +34,7 @@ import VisionView from './views/VisionView.vue';
 import TasksView from './views/TasksView.vue';
 import FunctionsView from './views/FunctionsView.vue';
 import CodeView from './views/CodeView.vue';
-import ImagesView from './views/ImagesView.vue';
+/* import ImagesView from './views/ImagesView.vue'; */ // For future image generation tab, requires a vision model that supports it.
 
 const tabs = [
   { id: 'chat', label: 'Chat', component: ChatView },
@@ -43,7 +43,7 @@ const tabs = [
   { id: 'tasks', label: 'Tasks', component: TasksView },
   { id: 'functions', label: 'Functions', component: FunctionsView },
   { id: 'code', label: 'Code', component: CodeView },
-  { id: 'images', label: 'Images', component: ImagesView },
+ /*  { id: 'images', label: 'Images', component: ImagesView }, */
 ];
 
 const activeTab = ref('chat');

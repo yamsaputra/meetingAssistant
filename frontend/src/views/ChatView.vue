@@ -16,7 +16,8 @@
             : 'bg-white border border-gray-200 text-gray-800 max-w-[80%]',
         ]"
       >
-        <p class="whitespace-pre-wrap">{{ msg.content }}</p>
+        <div v-if="msg.role === 'user'" class="whitespace-pre-wrap">{{ msg.content }}</div>
+        <div v-else class="markdown-content" v-html="parseMarkdown(msg.content)"></div>
       </div>
     </div>
 
@@ -47,9 +48,14 @@
 <script setup>
 import { ref } from 'vue';
 import { postChat } from '../api.js';
+import { useTasksStore } from '../stores/tasksStore.js';
+import { useFilesStore } from '../stores/filesStore.js';
+import { parseMarkdown } from '../utils/markdown.js';
 import ErrorAlert from '../components/ErrorAlert.vue';
 import LoadingSpinner from '../components/LoadingSpinner.vue';
 
+const tasksStore = useTasksStore();
+const filesStore = useFilesStore();
 const input = ref('');
 const loading = ref(false);
 const error = ref('');
@@ -63,7 +69,12 @@ async function send() {
   error.value = '';
   loading.value = true;
   try {
-    const data = await postChat(text);
+    const context = {
+      tasks: tasksStore.tasks,
+      uploadedFiles: filesStore.uploadedFiles,
+    };
+    console.log('[ChatView] Sending context:', context);
+    const data = await postChat(text, context);
     const reply = data.output_text ?? data.answer ?? data.response ?? JSON.stringify(data);
     messages.value.push({ role: 'assistant', content: reply });
   } catch (e) {

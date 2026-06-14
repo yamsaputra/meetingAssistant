@@ -1,3 +1,64 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Markdown styles for chat messages */
+.markdown-content {
+  @apply text-sm leading-relaxed;
+}
+
+.markdown-content strong {
+  @apply font-bold text-gray-900;
+}
+
+.markdown-content em {
+  @apply italic text-gray-800;
+}
+
+.markdown-content p {
+  @apply mb-2;
+}
+
+.markdown-content ul,
+.markdown-content ol {
+  @apply ml-4 mb-2;
+}
+
+.markdown-content li {
+  @apply mb-1;
+}
+
+.markdown-content code {
+  @apply bg-gray-100 px-1.5 py-0.5 rounded text-xs font-mono text-gray-800;
+}
+
+.markdown-content pre {
+  @apply bg-gray-100 p-3 rounded overflow-x-auto mb-2;
+}
+
+.markdown-content pre code {
+  @apply bg-transparent p-0;
+}
+
+.markdown-content a {
+  @apply text-blue-600 hover:underline;
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3 {
+  @apply font-bold mb-2 mt-2;
+}
+
+.markdown-content h1 {
+  @apply text-lg;
+}
+
+.markdown-content h2 {
+  @apply text-base;
+}
+
+.markdown-content h3 {
+  @apply text-sm;
+}
+

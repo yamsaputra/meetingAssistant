@@ -25,10 +25,10 @@
       <div v-if="error"><ErrorAlert :message="error" /></div>
     </div>
 
-    <div v-if="tasks.length" class="space-y-3">
-      <p class="text-sm font-medium text-gray-600">{{ tasks.length }} task{{ tasks.length !== 1 ? 's' : '' }} found</p>
+    <div v-if="tasksStore.tasks.length" class="space-y-3">
+      <p class="text-sm font-medium text-gray-600">{{ tasksStore.tasks.length }} task{{ tasksStore.tasks.length !== 1 ? 's' : '' }} found</p>
       <div
-        v-for="(task, i) in tasks"
+        v-for="(task, i) in tasksStore.tasks"
         :key="i"
         class="bg-white rounded-xl border border-gray-200 p-5 space-y-2"
       >
@@ -55,13 +55,14 @@
 <script setup>
 import { ref } from 'vue';
 import { extractTasks } from '../api.js';
+import { useTasksStore } from '../stores/tasksStore.js';
 import ErrorAlert from '../components/ErrorAlert.vue';
 import LoadingSpinner from '../components/LoadingSpinner.vue';
 
+const tasksStore = useTasksStore();
 const input = ref('');
 const loading = ref(false);
 const error = ref('');
-const tasks = ref([]);
 
 const priorityClass = (p) => ({
   low: 'bg-green-100 text-green-700',
@@ -71,11 +72,11 @@ const priorityClass = (p) => ({
 
 async function extract() {
   error.value = '';
-  tasks.value = [];
+  tasksStore.clearTasks();
   loading.value = true;
   try {
     const data = await extractTasks(input.value.trim());
-    tasks.value = data.tasks ?? [];
+    tasksStore.setTasks(data.tasks ?? []);
   } catch (e) {
     error.value = e.message;
   } finally {

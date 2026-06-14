@@ -38,25 +38,37 @@ router.post(
     const { input } = req.body ?? {};
     if (!input) return res.status(400).json({ error: 'input is required' });
 
-    const response = await createResponse({
-      model: config.defaultModel,
-      input,
-      instructions:
-        'Du extrahierst Aufgaben aus Meeting-Protokollen. ' +
-        'Erkenne pro Aufgabe Titel, Beschreibung, verantwortliche Person, ' +
-        'Priorität und (falls genannt) Fälligkeitsdatum im Format YYYY-MM-DD.',
-      text: {
-        format: {
-          type: 'json_schema',
-          name: 'task_list',
-          schema: TASK_SCHEMA,
-          strict: true,
+    try {
+      const response = await createResponse({
+        model: config.defaultModel,
+        input,
+        instructions:
+          'Du extrahierst Aufgaben aus Meeting-Protokollen. ' +
+          'Erkenne pro Aufgabe Titel, Beschreibung, verantwortliche Person, ' +
+          'Priorität und (falls genannt) Fälligkeitsdatum im Format YYYY-MM-DD.',
+        text: {
+          format: {
+            type: 'json_schema',
+            name: 'task_list',
+            schema: TASK_SCHEMA,
+            strict: true,
+          },
         },
-      },
-    });
+      });
 
-    const parsed = JSON.parse(response.output_text);
-    res.json({ response_id: response.id, tasks: parsed.tasks });
+      // Extract JSON from nested response structure
+      const textContent = response.output?.[0]?.content?.[0]?.text;
+      if (!textContent) {
+        console.error('[/tasks] No text content in response:', response);
+        return res.status(500).json({ error: 'No text content in API response' });
+      }
+
+      const parsed = JSON.parse(textContent);
+      res.json({ response_id: response.id, tasks: parsed.tasks });
+    } catch (e) {
+      console.error('[/tasks] Error:', e.message, e.stack);
+      res.status(500).json({ error: e.message });
+    }
   }),
 );
 
