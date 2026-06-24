@@ -12,4 +12,8 @@ export const config = {
   visionModel: process.env.VISION_MODEL ?? 'gpt-4o',
   imageModel: process.env.IMAGE_MODEL ?? 'gpt-4o',
   vectorStoreId: process.env.VECTOR_STORE_ID ?? null,
+  jiraUrl: process.env.JIRA_URL ?? '',
+  jiraEmail: process.env.JIRA_EMAIL ?? '',
+  jiraApiToken: process.env.JIRA_API_TOKEN ?? '',
+  jiraProjectKey: process.env.JIRA_PROJECT_KEY ?? '',
 };

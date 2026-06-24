@@ -36,7 +36,15 @@ router.post(
   '/tasks',
   asyncHandler(async (req, res) => {
     const { input } = req.body ?? {};
-    if (!input) return res.status(400).json({ error: 'input is required' });
+    console.log('[structured.js] Task extraction request received');
+    console.log('[structured.js] Input:', input?.substring(0, 100) + (input?.length > 100 ? '...' : ''));
+    
+    if (!input) {
+      console.error('[structured.js] ERROR: input is required');
+      return res.status(400).json({ error: 'input is required' });
+    }
+
+    console.log('[structured.js] Sending structured output request to model:', config.defaultModel);
 
     try {
       const response = await createResponse({
@@ -56,17 +64,26 @@ router.post(
         },
       });
 
+      console.log('[structured.js] Response received:', { id: response.id, hasOutput: !!response.output });
+
       // Extract JSON from nested response structure
       const textContent = response.output?.[0]?.content?.[0]?.text;
       if (!textContent) {
-        console.error('[/tasks] No text content in response:', response);
+        console.error('[structured.js] ERROR: No text content in response');
         return res.status(500).json({ error: 'No text content in API response' });
       }
 
+      console.log('[structured.js] Parsing JSON response');
       const parsed = JSON.parse(textContent);
+      console.log('[structured.js] Successfully extracted tasks:', {
+        taskCount: parsed.tasks?.length || 0,
+      });
       res.json({ response_id: response.id, tasks: parsed.tasks });
     } catch (e) {
-      console.error('[/tasks] Error:', e.message, e.stack);
+      console.error('[structured.js] ERROR:', {
+        message: e.message,
+        type: e.constructor.name,
+      });
       res.status(500).json({ error: e.message });
     }
   }),

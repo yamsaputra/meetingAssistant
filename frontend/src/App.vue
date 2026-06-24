@@ -9,7 +9,7 @@
           </svg>
         </div>
         <h1 class="text-xl font-semibold text-gray-900">Meeting Assistant</h1>
-        <span class="ml-auto text-xs text-gray-400 font-mono">localhost:8000</span>
+        <span class="ml-auto text-xs text-gray-400 font-mono">Alpha Version 0.33</span>
       </div>
     </header>
 
@@ -38,11 +38,11 @@ import CodeView from './views/CodeView.vue';
 
 const tabs = [
   { id: 'chat', label: 'Chat', component: ChatView },
-  { id: 'files', label: 'Files & Search', component: FilesView },
+  { id: 'files', label: 'File Input & Search', component: FilesView },
   { id: 'vision', label: 'Vision', component: VisionView },
   { id: 'tasks', label: 'Tasks', component: TasksView },
-  { id: 'functions', label: 'Functions', component: FunctionsView },
-  { id: 'code', label: 'Code', component: CodeView },
+  { id: 'functions', label: 'Function Calling', component: FunctionsView },
+  { id: 'code', label: 'Code Interpreter', component: CodeView },
  /*  { id: 'images', label: 'Images', component: ImagesView }, */
 ];
 

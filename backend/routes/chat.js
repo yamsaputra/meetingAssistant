@@ -13,9 +13,19 @@ router.post(
   '/',
   asyncHandler(async (req, res) => {
     const { input, instructions, context } = req.body ?? {};
-    if (!input) return res.status(400).json({ error: 'input is required' });
+    console.log('[chat.js] Received request with input:', input?.substring(0, 100) + (input?.length > 100 ? '...' : ''));
+    console.log('[chat.js] Has instructions:', !!instructions, 'Has context:', !!context);
+    
+    if (!input) {
+      console.error('[chat.js] ERROR: input is required');
+      return res.status(400).json({ error: 'input is required' });
+    }
 
-    console.log('[/chat] Received context:', context);
+    console.log('[chat.js] Received context:', { 
+      hasContext: !!context, 
+      tasksCount: context?.tasks?.length || 0,
+      filesCount: context?.uploadedFiles?.length || 0 
+    });
 
     // Build context-aware instructions
     let contextAware = instructions || '';
@@ -24,7 +34,7 @@ router.post(
         .map(t => `- [${t.priority}] ${t.title} (Assignee: ${t.assignee}, Due: ${t.due_date || 'N/A'})`)
         .join('\n');
       contextAware += (contextAware ? '\n\n' : '') + 'Session Tasks:\n' + tasksList;
-      console.log('[/chat] Added', context.tasks.length, 'tasks to context');
+      console.log('[chat.js] Added', context.tasks.length, 'tasks to context');
     }
 
     if (context?.uploadedFiles?.length) {
@@ -32,16 +42,31 @@ router.post(
         .map(f => `- ${f.filename} (ID: ${f.file_id})`)
         .join('\n');
       contextAware += (contextAware ? '\n\n' : '') + 'Uploaded Files:\n' + filesList;
-      console.log('[/chat] Added', context.uploadedFiles.length, 'files to context');
+      console.log('[chat.js] Added', context.uploadedFiles.length, 'files to context');
     }
 
-    const response = await createResponse({
+    console.log('[chat.js] Sending request to model:', { 
       model: config.defaultModel,
-      input,
-      ...(contextAware ? { instructions: contextAware } : {}),
+      hasInstructions: !!contextAware,
+      inputLength: input.length
     });
 
-    res.json({ response_id: response.id, output_text: extractText(response) });
+    try {
+      const response = await createResponse({
+        model: config.defaultModel,
+        input,
+        ...(contextAware ? { instructions: contextAware } : {}),
+      });
+
+      console.log('[chat.js] Response received successfully:', { 
+        id: response.id, 
+        hasOutput: !!response.output 
+      });
+      res.json({ response_id: response.id, output_text: extractText(response) });
+    } catch (error) {
+      console.error('[chat.js] ERROR calling createResponse:', error.message);
+      throw error;
+    }
   }),
 );
 

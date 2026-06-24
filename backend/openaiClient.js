@@ -65,7 +65,7 @@ export function createResponse(payload) {
 }
 
 /** POST /v1/files (multipart) */
-export async function uploadFile({ buffer, filename, mimeType, purpose = 'assistants' }) {
+export async function uploadFile({ buffer, filename, mimeType, purpose = 'user_data' }) {
   const form = new FormData();
   form.append('purpose', purpose);
   form.append(
@@ -91,13 +91,19 @@ export function getVectorStoreFile(vectorStoreId, fileId) {
   return request(`/vector_stores/${vectorStoreId}/files/${fileId}`, { method: 'GET' });
 }
 
-/** GET /v1/containers/{cid}/files/{fid}/content — returns Buffer */
+/** GET /v1/containers/{cid}/files — returns { data: [{id, path, ...}] } */
+export function listContainerFiles(containerId) {
+  return request(`/containers/${containerId}/files`, { method: 'GET' });
+}
+
+/** GET /v1/containers/{cid}/files/{fid}/content — returns { buffer, mimeType } */
 export async function downloadContainerFile(containerId, fileId) {
   const res = await request(
     `/containers/${containerId}/files/${fileId}/content`,
     { method: 'GET', raw: true },
   );
-  return Buffer.from(await res.arrayBuffer());
+  const mimeType = res.headers.get('content-type') ?? 'application/octet-stream';
+  return { buffer: Buffer.from(await res.arrayBuffer()), mimeType };
 }
 
 /** POST /v1/audio/transcriptions */

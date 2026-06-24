@@ -1,75 +1,115 @@
-# Meeting & Project Assistant — Boilerplate Server (Node/Express)
+# Meeting & Project Assistant — Boilerplate Server (Node/Express + Vue 3)
 
-Express server that wraps the **OpenAI Responses API** for a project/meeting
+Express backend + Vue 3 frontend that wraps the **OpenAI Responses API** for a project/meeting
 assistant demo. Uses raw `node-fetch` calls against `https://api.openai.com/v1`
 — no SDK — so the wire format is fully visible.
 
+---
+
+## Version History
+
+| Version | Date       | Area     | Change |
+| ------- | ---------- | -------- | ------ |
+| 0.33    | 2026-06-14 | Frontend | TasksView now properly collects and persists extracted tasks via Pinia `tasksStore` |
+| 0.33    | 2026-06-14 | Frontend | ChatView renders assistant replies as Markdown (via `utils/markdown.js`) |
+| 0.33    | 2026-06-14 | Frontend | ChatView passes ongoing tasks and uploaded file list as context to the chat API |
+| 0.33    | 2026-06-14 | Backend  | `chat.js` injects session tasks + uploaded files into system instructions |
+| 0.33    | 2026-06-14 | Backend  | `structured.js` updated task extraction schema and response handling |
+| 0.31    | 2026-05-31 | Repo     | Repository restructured: `src/` → `backend/`; Vue 3 + Vite frontend scaffolded |
+| 0.30    | 2026-05-31 | Backend  | `.env` configuration file added |
+| 0.20    | 2026-05-30 | Backend  | Initial Express server with all 8 OpenAI route handlers |
+
+---
+
 ## Features
 
-| Demo step                  | Endpoint                | Responses API tool        |
-| -------------------------- | ----------------------- | ------------------------- |
-| Plain chat / summary       | `POST /chat`            | (none)                    |
-| Document Q&A + Zitate      | `POST /files/search`    | `file_search`             |
-| Whiteboard-Foto analysieren| `POST /vision/analyze`  | vision (image input)      |
-| Aufgaben extrahieren       | `POST /structured/tasks`| `json_schema` text format |
-| Jira/Slack-Tickets anlegen | `POST /functions/run`   | function calling          |
-| `team_kapazitaeten.csv` analysieren | `POST /code/run` | `code_interpreter`        |
-| Bildausgabe                | `POST /images/generate` | `image_generation`        |
-| Audio (zukünftig)          | `POST /audio/*` (501)   | `audio.*`                 |
+| Feature                          | Backend endpoint         | Frontend view | OpenAI tool          |
+| -------------------------------- | ------------------------ | ------------- | -------------------- |
+| Plain chat / summary             | `POST /chat`             | Chat          | —                    |
+| Document Q&A + citations         | `POST /files/search`     | Files         | `file_search`        |
+| Whiteboard image analysis        | `POST /vision/analyze`   | Vision        | vision (image input) |
+| Task extraction                  | `POST /structured/tasks` | Tasks         | `json_schema`        |
+| Jira / Slack automation          | `POST /functions/run`    | Functions     | function calling     |
+| CSV analysis / chart generation  | `POST /code/run`         | Code          | `code_interpreter`   |
+| Image generation                 | `POST /images/generate`  | —             | `image_generation`   |
+| Audio (planned)                  | `POST /audio/*` (501)    | —             | `audio.*`            |
+
+---
 
 ## Setup
 
 Requires Node **18.17+** (uses global `FormData`/`Blob`) — Node 20+ recommended.
 
 ```bash
-cd meeting-assistant
 npm install
-cp .env.example .env   # fill in OPENAI_API_KEY
-npm run dev            # starts with --watch, both front- and -backend.
-npm run dev:frontend   # starts just the frontend.
-npm run dev:backend    # just the backend.
+cp .env.example .env   # fill in OPENAI_API_KEY and Jira credentials
+npm run dev            # starts both backend (port 8000) and frontend (port 5173)
+npm run dev:frontend   # frontend only
+npm run dev:backend    # backend only
 ```
 
-Server: `http://localhost:8000`
+- Backend: `http://localhost:8000`
+- Frontend: `http://localhost:5173`
+
+---
+
+## Frontend
+
+Built with **Vue 3 + Vite**, **Tailwind CSS**, and **Pinia** for state management.
+
+| View          | Description |
+| ------------- | ----------- |
+| **Chat**      | Markdown-rendered conversational chat; automatically includes current session tasks and uploaded files as context |
+| **Files**     | Drag-and-drop file upload with vector store indexing; semantic search with source citations |
+| **Code**      | Attach uploaded files and run natural-language prompts through the code interpreter; displays generated charts and files inline |
+| **Vision**    | Upload an image or paste a URL; enter a custom prompt to get a natural-language analysis |
+| **Tasks**     | Paste meeting notes to extract structured task cards (title, assignee, priority, due date); tasks persist across tab switches |
+| **Functions** | Issue natural-language instructions to trigger Jira ticket creation or Slack messages via function calling |
+
+State is shared across views via two Pinia stores:
+- `filesStore` — uploaded file list and current vector store ID
+- `tasksStore` — extracted tasks from the Tasks view, consumed by Chat as context
+
+---
 
 ## Demo walkthrough
 
-1. **Upload deine Demo-Dateien**
+1. **Upload your demo files**
    ```bash
    curl -F file=@sample_data/meeting_protokoll.pdf      http://localhost:8000/files/upload
    curl -F file=@sample_data/Projektbriefing.txt        http://localhost:8000/files/upload
    curl -F file=@sample_data/wissenschaftlicher-Artikel.pdf http://localhost:8000/files/upload
    ```
 
-2. **Projektstand zusammenfassen mit Zitaten**
+2. **Summarize project status with citations**
    ```bash
    curl -X POST http://localhost:8000/files/search \
      -H 'Content-Type: application/json' \
      -d '{"query":"Fasse den aktuellen Projektstand zusammen und zitiere die Quellen."}'
    ```
 
-3. **Whiteboard-Bild analysieren**
+3. **Analyze a whiteboard image**
    ```bash
    curl -X POST http://localhost:8000/vision/analyze \
      -F image=@sample_data/whiteboard.png \
      -F prompt="Welche Prozessschritte zeigt dieses Whiteboard?"
    ```
 
-4. **Aufgaben strukturiert extrahieren**
+4. **Extract tasks from meeting notes**
    ```bash
    curl -X POST http://localhost:8000/structured/tasks \
      -H 'Content-Type: application/json' \
      -d '{"input":"<Meeting-Protokoll als Text>"}'
    ```
 
-5. **Aufgaben in Jira pushen (Function Calling)**
+5. **Push tasks to Jira via function calling**
    ```bash
    curl -X POST http://localhost:8000/functions/run \
      -H 'Content-Type: application/json' \
      -d '{"input":"Erstelle Jira-Tickets für alle offenen Aufgaben aus dem Meeting."}'
    ```
 
-6. **CSV analysieren (Code Interpreter)**
+6. **Analyze a CSV with code interpreter**
    ```bash
    FID=$(curl -s -F file=@sample_data/team_kapazitaeten.csv \
             http://localhost:8000/files/upload | jq -r .file_id)
@@ -80,43 +120,70 @@ Server: `http://localhost:8000`
           \"file_ids\":[\"$FID\"]}"
    ```
 
-7. **Bild generieren**
+7. **Generate an image**
    ```bash
    curl -X POST http://localhost:8000/images/generate \
      -H 'Content-Type: application/json' \
      -d '{"prompt":"Cartoon-Maskottchen für unser Projektteam, freundlich, mit Laptop."}'
    ```
 
+---
+
 ## Project layout
 
 ```
-src/
+backend/
   server.js              # Express app + router registration
-  config.js              # env loader
+  config.js              # env loader (OpenAI, Jira, server settings)
   openaiClient.js        # node-fetch wrapper for /v1 endpoints
   utils.js               # response-parsing helpers
-  tools.js               # mock create_jira_ticket / send_slack_message
+  tools.js               # Jira + Slack integration (TOOL_REGISTRY / TOOL_DEFINITIONS)
   middleware.js          # asyncHandler + central error handler
   routes/
-    chat.js
+    chat.js              # context-aware chat (injects tasks & files into system prompt)
     files.js             # upload, vector store, file_search
     vision.js
     structured.js        # JSON-schema task extraction
-    functions.js         # full tool-call agent loop
-    codeInterpreter.js
+    functions.js         # full tool-call agent loop (max 5 turns)
+    codeInterpreter.js   # code execution + container file download
     images.js
     audio.js             # stubbed until audio is GA
+
+frontend/
+  src/
+    App.vue              # tab shell (Alpha v0.33), KeepAlive wrapper
+    api.js               # fetch wrappers for all backend routes
+    style.css            # global Tailwind base styles
+    utils/
+      markdown.js        # Markdown → HTML renderer used by ChatView
+    stores/
+      filesStore.js      # Pinia: uploaded files + vector store ID
+      tasksStore.js      # Pinia: extracted tasks, persisted across tab switches
+    views/
+      ChatView.vue       # Markdown-rendered chat with task + file context injection
+      FilesView.vue      # drag-and-drop upload; semantic search with citations
+      CodeView.vue       # code interpreter prompt + inline generated file output
+      VisionView.vue     # image upload/URL + custom analysis prompt
+      TasksView.vue      # meeting notes → structured task cards
+      FunctionsView.vue  # natural-language → Jira/Slack tool calls
+    components/
+      TabNav.vue
+      LoadingSpinner.vue
+      ErrorAlert.vue
+      JsonBlock.vue
+
+processes/
+  TASK_FLOW.md           # internal process documentation
+
 sample_data/             # drop your demo files here
 ```
 
+---
+
 ## Notes
 
-- The vector store is created lazily on first upload. Set `VECTOR_STORE_ID`
-  in `.env` to reuse one across restarts.
-- `tools.js` is where you swap mock Jira/Slack calls for real ones.
-- The function-calling loop caps at 5 turns — bump `MAX_TURNS` in
-  `routes/functions.js` if your demo needs more chained calls.
-- Switch models per-feature via `DEFAULT_MODEL`, `VISION_MODEL`, `IMAGE_MODEL`.
-- Audio: the wiring (`transcribeAudio`, `synthesizeSpeech` in `openaiClient.js`,
-  routes in `routes/audio.js`) is already in place — just flip
-  `AUDIO_ENABLED = true` when you're ready.
+- The vector store is created lazily on first upload. Set `VECTOR_STORE_ID` in `.env` to reuse one across restarts.
+- `tools.js` contains a working Jira integration (`createJiraTicket`). Configure it via `JIRA_URL`, `JIRA_EMAIL`, `JIRA_TOKEN`, and `JIRA_PROJECT_KEY` in `.env`. Slack (`sendSlackMessage`) is currently mocked.
+- The function-calling loop caps at 5 turns — bump `MAX_TURNS` in `routes/functions.js` if your demo needs more chained calls.
+- Switch models per-feature via `DEFAULT_MODEL`, `VISION_MODEL`, `IMAGE_MODEL` in `.env`.
+- Audio: the wiring (`transcribeAudio`, `synthesizeSpeech` in `openaiClient.js`, routes in `routes/audio.js`) is already in place — just flip `AUDIO_ENABLED = true` when you're ready.

@@ -59,7 +59,7 @@
         <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Generated Files</p>
         <div v-for="(file, i) in result.generated_files" :key="i" class="bg-white rounded-xl border border-gray-200 overflow-hidden">
           <div class="px-4 py-2 bg-gray-50 border-b border-gray-100">
-            <span class="text-xs font-mono text-gray-500">{{ file.mime_type ?? 'file' }}</span>
+            <span class="text-xs font-mono text-gray-500">{{ file.kind === 'code_interpreter_logs' ? 'stdout / stderr' : (file.mime_type ?? 'file') }}</span>
           </div>
           <div class="p-4">
             <img
@@ -68,6 +68,10 @@
               alt="Generated output"
               class="max-w-full rounded"
             />
+            <pre
+              v-else-if="file.kind === 'code_interpreter_logs'"
+              class="text-xs text-gray-500 bg-gray-50 p-3 rounded overflow-x-auto whitespace-pre-wrap"
+            >{{ file.logs }}</pre>
             <pre v-else class="text-xs text-gray-700 overflow-x-auto">{{ file.data }}</pre>
           </div>
         </div>

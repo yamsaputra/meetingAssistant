@@ -54,15 +54,23 @@ export function extractGeneratedFiles(response) {
   const files = [];
   for (const item of response?.output ?? []) {
     if (item.type === 'code_interpreter_call') {
+      const container_id = item.container_id ?? null;
       for (const out of item.outputs ?? []) {
         if (out.type === 'files') {
           for (const f of out.files ?? []) {
             files.push({
               kind: 'code_interpreter_file',
-              file_id: f.file_id ?? null,
+              container_id,
+              file_id: f.file_id ?? f.container_file_id ?? null,
               mime_type: f.mime_type ?? null,
             });
           }
+        }
+        if (out.type === 'logs') {
+          files.push({
+            kind: 'code_interpreter_logs',
+            logs: out.logs ?? '',
+          });
         }
       }
     }

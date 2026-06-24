@@ -63,8 +63,8 @@ app.use('/audio', audioRouter);
 app.use(errorMiddleware);
 
 app.listen(config.port, config.host, () => {
-  console.log(`[server.mjs -  DEV] listening on http://${config.host}:${config.port}`);
-  console.log(`[server.mjs -  DEV] config data: ${JSON.stringify(config)}`);
+  console.log(`[server.js -  DEV] listening on http://${config.host}:${config.port}`);
+  console.log(`[server.js -  DEV] config data: ${JSON.stringify(config)}`);
   if (!config.openaiApiKey) {
     console.warn('[warn] OPENAI_API_KEY is not set — API calls will fail');
   }
