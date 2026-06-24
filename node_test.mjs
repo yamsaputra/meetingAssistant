@@ -23,10 +23,10 @@ const response = await fetch(
 /**
  * discover-fields — call Jira directly, print the custom field .env lines.
  */
-const JIRA_URL = "https://yamsaputra.atlassian.net";
-const JIRA_EMAIL = "yamuniverse@gmail.com";
+const JIRA_URL = process.env.JIRA_URL
+const JIRA_EMAIL = process.env.JIRA_EMAIL
 const JIRA_API_TOKEN =
-  "ATATT3xFfGF09XGN66G4n8QmFZZsMa5mYSzCjuo0ZCE-vq_ErlsahNCLq1TiUWaMi226ixTnDg5ZzGbGw9CgfvIE3LhcoRSVyAjBnj9z49GgesRyGmfOoogkzzcE9sSaGsSuLJqUmrHhNStLoCm7JpxsiZ249ReQRuHd-iPgcT3V2_DBxj_vaAE=641BF50C";
+  process.env.JIRA_API_TOKEN
 
 const authHeader =
   "Basic " + Buffer.from(`${JIRA_EMAIL}:${JIRA_API_TOKEN}`).toString("base64");
