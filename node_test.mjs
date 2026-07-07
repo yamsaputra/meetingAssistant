@@ -1,19 +1,19 @@
 
+const JIRA_URL = process.env.JIRA_URL;
+const JIRA_EMAIL = process.env.JIRA_EMAIL;
+const JIRA_API_TOKEN = process.env.JIRA_API_TOKEN;
+
+const authHeader =
+  "Basic " + Buffer.from(`${JIRA_EMAIL}:${JIRA_API_TOKEN}`).toString("base64");
+
 // fetch Jira Issues
-const response = await fetch(
-  "https://yamsaputra.atlassian.net/rest/api/2/issue/createmeta",
-  {
-    headers: {
-      method: "GET",
-      Authorization:
-        "Basic " +
-        Buffer.from(
-          "yamuniverse@gmail.com:ATATT3xFfGF09XGN66G4n8QmFZZsMa5mYSzCjuo0ZCE-vq_ErlsahNCLq1TiUWaMi226ixTnDg5ZzGbGw9CgfvIE3LhcoRSVyAjBnj9z49GgesRyGmfOoogkzzcE9sSaGsSuLJqUmrHhNStLoCm7JpxsiZ249ReQRuHd-iPgcT3V2_DBxj_vaAE=641BF50C",
-        ).toString("base64"),
-      Accept: "application/json",
-    },
+const response = await fetch(`${JIRA_URL}/rest/api/2/issue/createmeta`, {
+  method: "GET",
+  headers: {
+    Authorization: authHeader,
+    Accept: "application/json",
   },
-);
+});
 
 /* const responseData = await response.json(); */
 
@@ -23,14 +23,6 @@ const response = await fetch(
 /**
  * discover-fields — call Jira directly, print the custom field .env lines.
  */
-const JIRA_URL = process.env.JIRA_URL
-const JIRA_EMAIL = process.env.JIRA_EMAIL
-const JIRA_API_TOKEN =
-  process.env.JIRA_API_TOKEN
-
-const authHeader =
-  "Basic " + Buffer.from(`${JIRA_EMAIL}:${JIRA_API_TOKEN}`).toString("base64");
-
 const responseFields = await fetch(`${JIRA_URL}/rest/api/2/field`, {
   method: "GET",
   headers: {

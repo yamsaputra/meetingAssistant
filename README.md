@@ -1,4 +1,4 @@
-# Meeting & Project Assistant — Boilerplate Server (Node/Express + Vue 3)
+# Meeting & Project Assistant (Node & Express JS + Vue 3)
 
 Express backend + Vue 3 frontend that wraps the **OpenAI Responses API** for a project/meeting
 assistant demo. Uses raw `node-fetch` calls against `https://api.openai.com/v1`
@@ -10,6 +10,7 @@ assistant demo. Uses raw `node-fetch` calls against `https://api.openai.com/v1`
 
 | Version | Date       | Area     | Change |
 | ------- | ---------- | -------- | ------ |
+| 0.33.1  | 2026-07-07 | Security | Removed hardcoded Atlassian API token from `node_test.mjs`; credentials now read from `JIRA_URL` / `JIRA_EMAIL` / `JIRA_API_TOKEN` env vars |
 | 0.33    | 2026-06-14 | Frontend | TasksView now properly collects and persists extracted tasks via Pinia `tasksStore` |
 | 0.33    | 2026-06-14 | Frontend | ChatView renders assistant replies as Markdown (via `utils/markdown.js`) |
 | 0.33    | 2026-06-14 | Frontend | ChatView passes ongoing tasks and uploaded file list as context to the chat API |
